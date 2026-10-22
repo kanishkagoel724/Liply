@@ -82,50 +82,54 @@ function startLipTrackingForUpload(){
 }
 
 function onFaceResults(results){
-  if(!overlay.width) { overlay.width=vid.videoWidth; overlay.height=vid.videoHeight; }
+  // Canvas size set
+  if(!overlay.width || overlay.width !== vid.videoWidth){
+    overlay.width = vid.videoWidth;
+    overlay.height = vid.videoHeight;
+  }
   ctx.clearRect(0,0,overlay.width,overlay.height);
+
   if(results.multiFaceLandmarks && results.multiFaceLandmarks[0]){
-    const landmarks=results.multiFaceLandmarks[0];
+    const landmarks = results.multiFaceLandmarks[0];
     
-    // Pura lip ka outline - outer lips
+    // दोनों lips के points
     const outerLips = [61,146,91,181,84,17,314,405,321,375,291,308,324,318,402,317,14,87,178,88,95];
-    // Inner lips
-    const innerLips = [78,95,88,178,87,14,317,402,318,324,308,291,375,321,405,314,17,84,181,91,146,61];
+    const innerLips = [78,95,88,178,87,14,317,402,318,324,308,291,375,321,405,314,17,84,181,91,146];
 
-    ctx.strokeStyle = '#ff0055'; // Blue ki jagah sexy pink-red
-    ctx.lineWidth = 2.5;
+    // बहुत light highlight - barely visible
+    ctx.strokeStyle = 'rgba(255, 182, 193, 0.7)'; // light pink
+    ctx.fillStyle = 'rgba(255, 182, 193, 0.12)'; // bahut halka fill
+    ctx.lineWidth = 1.2; // पतली line
     ctx.lineJoin = 'round';
-    
-    // Outer lips draw
+
+    // Outer lips
     ctx.beginPath();
-    outerLips.forEach((i, idx)=>{
-      const p=landmarks[i];
-      if(idx===0) ctx.moveTo(p.x*overlay.width, p.y*overlay.height);
-      else ctx.lineTo(p.x*overlay.width, p.y*overlay.height);
+    outerLips.forEach((idx, i)=>{
+      const p = landmarks[idx];
+      const x = p.x * overlay.width;
+      const y = p.y * overlay.height;
+      if(i===0) ctx.moveTo(x,y);
+      else ctx.lineTo(x,y);
     });
     ctx.closePath();
+    ctx.fill();
     ctx.stroke();
 
-    // Inner lips thoda halka
-    ctx.strokeStyle = '#ff8fab';
-    ctx.lineWidth = 1.5;
+    // Inner lips - aur bhi light
+    ctx.strokeStyle = 'rgba(255, 192, 203, 0.5)';
+    ctx.fillStyle = 'rgba(255, 192, 203, 0.06)';
+    ctx.lineWidth = 0.8;
     ctx.beginPath();
-    innerLips.forEach((i, idx)=>{
-      const p=landmarks[i];
-      if(idx===0) ctx.moveTo(p.x*overlay.width, p.y*overlay.height);
-      else ctx.lineTo(p.x*overlay.width, p.y*overlay.height);
+    innerLips.forEach((idx, i)=>{
+      const p = landmarks[idx];
+      const x = p.x * overlay.width;
+      const y = p.y * overlay.height;
+      if(i===0) ctx.moveTo(x,y);
+      else ctx.lineTo(x,y);
     });
     ctx.closePath();
+    ctx.fill();
     ctx.stroke();
-
-    const upper=landmarks[13], lower=landmarks[14];
-    const dist=Math.abs(upper.y-lower.y);
-    lipData.push(dist);
-    if(isUploadMode){
-      out.innerText=`🔍 Tracking... Frames: ${lipData.length}`;
-    } else if(dist>0.025){
-      out.innerText=`👄 Muh Khula Hai`;
-    }
   }
 }
 
