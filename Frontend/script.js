@@ -86,22 +86,45 @@ function onFaceResults(results){
   ctx.clearRect(0,0,overlay.width,overlay.height);
   if(results.multiFaceLandmarks && results.multiFaceLandmarks[0]){
     const landmarks=results.multiFaceLandmarks[0];
-    const lipsIndices=[61,146,91,181,84,17,314,405,321,375,291,13,14];
-    ctx.fillStyle='#2563eb';
-    lipsIndices.forEach(i=>{
+    
+    // Pura lip ka outline - outer lips
+    const outerLips = [61,146,91,181,84,17,314,405,321,375,291,308,324,318,402,317,14,87,178,88,95];
+    // Inner lips
+    const innerLips = [78,95,88,178,87,14,317,402,318,324,308,291,375,321,405,314,17,84,181,91,146,61];
+
+    ctx.strokeStyle = '#ff0055'; // Blue ki jagah sexy pink-red
+    ctx.lineWidth = 2.5;
+    ctx.lineJoin = 'round';
+    
+    // Outer lips draw
+    ctx.beginPath();
+    outerLips.forEach((i, idx)=>{
       const p=landmarks[i];
-      ctx.beginPath();
-      ctx.arc(p.x*overlay.width, p.y*overlay.height, 2.5, 0, 2*Math.PI);
-      ctx.fill();
+      if(idx===0) ctx.moveTo(p.x*overlay.width, p.y*overlay.height);
+      else ctx.lineTo(p.x*overlay.width, p.y*overlay.height);
     });
+    ctx.closePath();
+    ctx.stroke();
+
+    // Inner lips thoda halka
+    ctx.strokeStyle = '#ff8fab';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    innerLips.forEach((i, idx)=>{
+      const p=landmarks[i];
+      if(idx===0) ctx.moveTo(p.x*overlay.width, p.y*overlay.height);
+      else ctx.lineTo(p.x*overlay.width, p.y*overlay.height);
+    });
+    ctx.closePath();
+    ctx.stroke();
+
     const upper=landmarks[13], lower=landmarks[14];
     const dist=Math.abs(upper.y-lower.y);
     lipData.push(dist);
     if(isUploadMode){
-      out.innerText=`🔍 Upload Video Lips Tracking... Frames: ${lipData.length} | Open: ${dist.toFixed(4)}`;
+      out.innerText=`🔍 Tracking... Frames: ${lipData.length}`;
     } else if(dist>0.025){
-      out.innerText=`👄 Muh Khula Hai - Distance: ${dist.toFixed(4)}`;
-      out.style.color='#ef4444';
+      out.innerText=`👄 Muh Khula Hai`;
     }
   }
 }
